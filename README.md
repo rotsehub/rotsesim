@@ -179,6 +179,6 @@ The file output1.txt contains three columns: the first column is Rstar (as provi
 
 The file output2.txt contains three columns: Rstar, Teff, and the total number of photons emitted by the star per second across all wavelengths of the ROTSE-III sensitivity range (i.e. the number of photons emitted per second for each ~700 rows in output1.txt are summed to a single value; the single value is listed next to the corresponding pair of Rstar and Teff for which the photons per second have been calculated).
 
-These two files exist because the ROTSE-III CCD has a different efficiency for each wavelength of light; at certain wavelengths, more photons may be necessary to excite electrons on the CCD than for other wavelengths. The response function has been provided by Govinda Dhungana and is available upon request.
+These two files exist because the ROTSE-III CCD has a different efficiency for each wavelength of light; at certain wavelengths, more photons may be necessary to excite electrons on the CCD than for other wavelengths. The response function has been provided by Govinda Dhungana and is available at the following link: https://github.com/gdhungana/SNEPM/blob/master/data/rotse_response_normalized.ecsv.
 
 Be sure to either rename these files or move them out of this directory before running this script again, as this script will overwrite the preexisting files if they exist in the same directory.
