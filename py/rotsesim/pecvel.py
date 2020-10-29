@@ -1,3 +1,12 @@
+"""
+rotsesim.pecvel
+
+This code runs a peculiar velocity simulation that adds
+random peculiar velocities to a simulated galaxy sample,
+then finds H0 using a linear fit, attempting to mitigate
+the effects of peculiar motion.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.odr import *
