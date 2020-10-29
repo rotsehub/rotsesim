@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+"""
+This script generates mock galaxies with random distance and velocity properties, fitting h0 after simulating peculiar velocities for each mock galaxy.
+
+Args:
+    h0 (float): value of h0 to use for simulating mock velocities
+    distance (float): range of distances to simulate in Mpc
+    disterr (float): mean and standard deviation of distance errors
+    pecvel (float): standard deviation in km/s for Gaussian distribution of peculiar velocities
+    ngal (int): number of galaxies to simulate
+    nsim (int): number of simulations each containing ngal mock galaxies
+    iterations (int): number of times to iterate after rejecting outliers
+    plothist (bool): plot h0 histogram after initial fit
+    plotprog (bool): plot progress of H0 average and rms after iterating
+
+Example command line run:
+
+$ pecvel --h0 70. --distance  5. 30. --disterr 0.2 0.05 --pecvel 300.
+                       --ngal 10 --nsim 1000 --iterations 30 --plothist --plotprog
+
+Outputs:
+    Plots showing progression of h0 mean and standard deviation after rejecting outliers following each iteration
+"""
+import argparse
+from rotsesim.pecvel import pecvel_sim
+
+#- Setup command line arguments, default values can be used for each
+parser=argparse.ArgumentParser()
+parser.add_argument("--h0",type=float,default=70.)
+parser.add_argument("--distance",type=float,nargs=2,default=[5.,30.])
+parser.add_argument("--disterr",type=float,nargs=2,default=[0.2,0.05])
+parser.add_argument("--pecvel",type=float,default=300.)
+parser.add_argument("--ngal",type=int,default=10)
+parser.add_argument("--nsim",type=int,default=1000)
+parser.add_argument("--iterations",type=int,default=1)
+parser.add_argument("--plothist",action='store_true',default=False)
+parser.add_argument("--plotprog",action='store_true',default=False)
+parser.add_argument("--seed",type=int,default=None)
+args=parser.parse_args()
+
+#- Grab information from command line arguments
+h0         = args.h0
+distance   = args.distance
+disterr    = args.disterr
+pecvel     = args.pecvel
+ngal       = args.ngal
+nsim       = args.nsim
+iterations = args.iterations
+plothist   = args.plothist
+plotprog   = args.plotprog
+seed       = args.seed
+
+#- Run peculiar velocity simulation
+pecvel_sim(h0,distance,disterr,pecvel,ngal,nsim,iterations,plothist,plotprog,seed)
+
+
