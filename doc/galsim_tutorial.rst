@@ -25,7 +25,7 @@ plotprog (bool): plot progress of H0 average and rms after iterating
 
 Example command line run::
 
-$> pecvel --h0 70. --distance  5. 30. --disterr 0.2 0.05 --pecvel 300. --ngal 10 --nsim 1000 --iterations 30 --plothist --plotprog
+$> galsim --h0 70. --distance  5. 30. --disterr 0.2 0.05 --pecvel 300. --ngal 10 --nsim 1000 --iterations 30 --plothist --plotprog
 
 The output is simply plots showing progression of h0 mean and standard deviation after rejecting outliers following each iteration as well as fit H0 values shown in the terminal.
 
