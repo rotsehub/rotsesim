@@ -4,15 +4,24 @@ Peculiar Velocity Simulation Tutorial
 This script generates mock galaxies with random distance and velocity properties, fitting H0 after simulating peculiar velocities for each mock galaxy. 
 
 Command line arguments:
-* h0 (float): value of h0 to use for simulating mock velocities
-* distance (float): range of distances to simulate in Mpc
-* disterr (float): mean and standard deviation of distance errors
-* pecvel (float): standard deviation in km/s for Gaussian distribution of peculiar velocities
-* ngal (int): number of galaxies to simulate
-* nsim (int): number of simulations each containing ngal mock galaxies
-* iterations (int): number of times to iterate after rejecting outliers
-* plothist (bool): plot h0 histogram after initial fit
-* plotprog (bool): plot progress of H0 average and rms after iterating
+
+h0 (float): value of h0 to use for simulating mock velocities
+
+distance (float): range of distances to simulate in Mpc
+
+disterr (float): mean and standard deviation of distance errors
+
+pecvel (float): standard deviation in km/s for Gaussian distribution of peculiar velocities
+
+ngal (int): number of galaxies to simulate
+
+nsim (int): number of simulations each containing ngal mock galaxies
+
+iterations (int): number of times to iterate after rejecting outliers
+
+plothist (bool): plot h0 histogram after initial fit
+
+plotprog (bool): plot progress of H0 average and rms after iterating
 
 Example command line run::
 
