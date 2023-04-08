@@ -122,61 +122,12 @@ class ObservationTimes:
         
         ## Go star by star
         for star in self.__StarsArray:
-            plt.rcParams["figure.figsize"] = [7.50, 3.50]
-            plt.rcParams["figure.autolayout"] = True
-            
-            ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', )
-
-            ax.set_xlim(2150,2230)
-            
-            ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
-            ax.set_xlim(2150,2230)
             ## Filter all the days out of the DataFrame
             star.setData( DayNightFilter.DayNightFilter.filter_night_entries(star.getData(), self.__start_date, self.__end_date, self.__obsLocationLatitude, self.__obsLocationLongitude))
-            print(star.getData())
-            
-            plt.rcParams["figure.figsize"] = [7.50, 3.50]
-            plt.rcParams["figure.autolayout"] = True
-            
-            ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', )
-
-            ax.set_xlim(2150,2155)
-            
-            ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
-            ax.set_xlim(2150,2230)
             ## Filter all elevation less than the threshold (config value)
             star.setData(ElevationFilter.ElevationFilter.Filter_By_Elevation(star.getData(), self.__obsLocationLatitude, self.__obsLocationLongitude, star.getRA(), star.getDec(), self.__start_date, self.__end_date, self.__elevationThreshold))
-            print(star.getData())
-            
-            plt.rcParams["figure.figsize"] = [7.50, 3.50]
-            plt.rcParams["figure.autolayout"] = True
-            
-            ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', )
 
-            ax.set_xlim(0,1)
-            
-            ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
-            ax.set_xlim(2150,2230)
-            
-            ax = star.getData().plot.scatter(x = 'star_age_day', y = 'elevation')
-            ax.set_xlim(2220,2225)
-            
-            oneDayData = star.getData()
-            oneDayData = oneDayData[oneDayData["model_number"] > 418860]
-            print(oneDayData)
-            
-            cs = CubicSpline(oneDayData["star_age_day"], oneDayData["luminosity"])
-            fig, ax = plt.subplots(figsize=(6.5, 4))
-            xs = [2230.525, 2230.63, 2230.48]
-            ax.plot(oneDayData["star_age_day"], oneDayData["luminosity"], 'o', label='data')
-            print(xs)
-            ax.plot(xs, cs(xs), 'o', label='interpolated')
-            ax.legend(loc='lower left', ncol=2)
-            ax.set_ylim(8e+17,12e+17)
-            plt.show()
-            
-            star.getData().to_csv('output.csv', index=True)
     def getStarsArray(self):
         return self.__StarsArray
     
-stuff = ObservationTimes()
+ObservationTimesObject = ObservationTimes()

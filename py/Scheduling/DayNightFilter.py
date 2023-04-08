@@ -10,6 +10,7 @@ import ephem
 import datetime
 from zoneinfo import ZoneInfo
 import configparser
+import numpy as np
 
 class DayNightFilter:
     def filter_night_entries(df, start_date, end_date, latitude, longitude):
@@ -52,30 +53,23 @@ class DayNightFilter:
         
         ## Create a new column containing a boolean that shows whether it is day or night. Assign False initially.
         df['night_time'] = False
-        
+        df['CurrentTime'] = np.nan
         ## Go observation by observation
         for i, row in df.iterrows():
             ## Calculate the current time based on the start_date and the day offset from the simulation
             currentTime = start_date + datetime.timedelta(days=row['star_age_day'])
+            df.at[i, 'CurrentTime'] = currentTime
             ## set the date at the observation location to be currentTime
-            observer.date = currentTime # The currentTime is automatically converted to UTC (it knows how to do it because the start_date contains information about the timezone of the observation location)
+            observer.date = currentTime # The currentTime is automatically converted to UTC (it knows how to do it because the start_date contains information about the timezone of the observation location. 
+            # I would recommend just setting timezone to UTC directly in the config since this is what astronomers use anyway.
+
             ## Set the night_time column value equal to true for the current row if the previous_rising is NOT later than the previous_setting
             ## We had to resort to this condition because checking whether the current time is between the previous_setting and next_rising
             ## would always return true.
             if not(observer.previous_rising(ephem.Sun()) > observer.previous_setting(ephem.Sun())):            
                 df.at[i, 'night_time'] = True
                 # print(currentTime)
-        ## Keep only observation when it is nighttime        
+                
+        ## Keep only the nighttime observations     
         df = df[df['night_time'] == True]
         return df
-
-    # df = pd.read_csv('OutputWithDigitsGood1234.csv', header = 0, low_memory=False)
-    # df['luminosity'] =df['luminosity'] * (6.29)*(10^14) # instantenous solar luminosity * mesa output
-    # df = df.dropna()
-    # start_date = datetime.datetime(2003, 1, 1, 12, 0, 0)
-    # end_date = datetime.datetime(2009, 12, 31, 12, 0, 0)
-    # latitude = '30.6792'
-    # longitude = '-104.0172'
-
-    # filtered_df = filter_night_entries(df, start_date, end_date, latitude, longitude)
-    # print(filtered_df['star_age_day']) 

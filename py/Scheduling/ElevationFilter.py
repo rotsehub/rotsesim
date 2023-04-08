@@ -77,6 +77,5 @@ class ElevationFilter:
             ## Adding the elevation value to the elevation column for the current row
             df.at[i, 'elevation'] = np.degrees(star.alt)
         #Remove all observations below the threshold    
-        df.to_csv('outputAllElevations.csv', index=True)
         df = df[df['elevation'] > elevationThreshold]    
         return df
