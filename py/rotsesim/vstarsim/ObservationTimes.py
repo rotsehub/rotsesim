@@ -4,6 +4,10 @@ Created on Fri Feb 17 22:28:09 2023
 
 @author: gigic
 """
+
+#import sys
+# sys.path.append("..")
+
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -81,6 +85,7 @@ class ObservationTimes:
         Then, it generates star coordinates, reads the data, plots the stars, and filters the data based on the day/night cycle
         and elevation threshold.
         """
+        
         config = configparser.ConfigParser()
         config.read('config.ini')
     
