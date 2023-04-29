@@ -2,12 +2,8 @@
 """
 Created on Fri Feb 17 22:28:09 2023
 
-@author: gigic
+@author: George Pantelimon
 """
-
-#import sys
-# sys.path.append("..")
-
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -22,6 +18,7 @@ from zoneinfo import ZoneInfo
 import DayNightFilter
 import ElevationFilter
 from scipy.interpolate import CubicSpline
+import RotseIIIScheduler
 
 class ObservationTimes:
     """
@@ -85,10 +82,14 @@ class ObservationTimes:
         Then, it generates star coordinates, reads the data, plots the stars, and filters the data based on the day/night cycle
         and elevation threshold.
         """
-        
         config = configparser.ConfigParser()
         config.read('config.ini')
     
+        ## Program parameters
+        if(config["ProgramParameters"]["verbose"] == "True"):
+            self.__verbose = True 
+        else:
+            self.__verbose = False
         ## Constants
         self.__instaSolarLuminosity = float(config["Constants"]["instaSolarLuminosity"])
         
@@ -106,6 +107,7 @@ class ObservationTimes:
         self.__obsLocationLatitude = config["ObservationLocationInfo"]["latitude"]
         self.__obsLocationLongitude = config["ObservationLocationInfo"]["longitude"]
         self.__obsLocationTimeZone = config["ObservationLocationInfo"]["timeZone"]
+        self.__obsLocationElevation = float(config["ObservationLocationInfo"]["telescopeElevation"])
         
         ## SimulationDateRange
         self.__start_date = datetime.datetime.strptime(config["SimulationDateRange"]["start_date"], '%m/%d/%Y %H:%M:%S')
@@ -127,11 +129,67 @@ class ObservationTimes:
         
         ## Go star by star
         for star in self.__StarsArray:
+            if(self.__verbose):
+                plt.rcParams["figure.figsize"] = [7.50, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+                
+                ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', xlabel='days')
+                ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', xlabel = 'days')
+    
+                #ax.set_xlim(1502.17,1502.23)
+                #ax.set_ylim(0.6e18,1e18)
+                
+                ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
+                ax.set_xlim(2150,2200)
             ## Filter all the days out of the DataFrame
-            star.setData( DayNightFilter.DayNightFilter.filter_night_entries(star.getData(), self.__start_date, self.__end_date, self.__obsLocationLatitude, self.__obsLocationLongitude))
-            ## Filter all elevation less than the threshold (config value)
-            star.setData(ElevationFilter.ElevationFilter.Filter_By_Elevation(star.getData(), self.__obsLocationLatitude, self.__obsLocationLongitude, star.getRA(), star.getDec(), self.__start_date, self.__end_date, self.__elevationThreshold))
+            star.setData( DayNightFilter.DayNightFilter.filter_night_entries(star.getData(), self.__start_date, self.__end_date, self.__obsLocationLatitude, self.__obsLocationLongitude, self.__obsLocationElevation))
+            if(self.__verbose):
+                print("Data after DayNight filtration")
+                print(star.getData())
+            
+                plt.rcParams["figure.figsize"] = [7.50, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+            
+                ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', )
 
+                #ax.set_xlim(2150,2200)
+            
+                ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
+                #ax.set_xlim(2150,2200)
+            ## Filter all elevation less than the threshold (config value)
+            star.setData(ElevationFilter.ElevationFilter.Filter_By_Elevation(star.getData(), self.__obsLocationLatitude, self.__obsLocationLongitude, star.getRA(), star.getDec(), self.__start_date, self.__end_date, self.__elevationThreshold, self.__obsLocationElevation))
+            if(self.__verbose):
+                print("Data after DayNight and Elevation filtration")
+                print(star.getData())
+                print(str("Star RA: " + str(star.getRA())) + " " + "Star Dec: " + str(star.getDec()))
+                plt.rcParams["figure.figsize"] = [7.50, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+            
+                ax = star.getData().plot.scatter(x = 'star_age_day', y = 'luminosity', )
+
+                #ax.set_xlim(2128,2129)
+                #ax.set_ylim(0.6e18,1e18)
+            
+                ax = star.getData().plot.line(x = 'star_age_day', y = 'luminosity', )
+                #ax.set_xlim(2150,2200)
+            
+                ax = star.getData().plot.scatter(x = 'star_age_day', y = 'elevation')
+                #ax.set_xlim(2150,2155)
+            
+            ## Apply the Rotse III scheduling algorithm
+            obsTimes = RotseIIIScheduler.RotseIIIScheduler.ScheduleObservations(star.getData(), self.__start_date, self.__end_date, star, self.__obsLocationLatitude, self.__obsLocationLongitude, timeZone, self.__elevationThreshold, self.__verbose, self.__obsLocationElevation)
+            star.setInterpolatedData(obsTimes) # save the schedule data resulted from the algortihm in the star object
+            
+            #Plot scheduled observations
+            if(self.__verbose):
+                plt.rcParams["figure.figsize"] = [7.50, 3.50]
+                plt.rcParams["figure.autolayout"] = True
+                ax = obsTimes.plot.scatter(x = 'star_age_day', y = 'luminosity', )
+                #ax.set_xlim(1502.17,1502.23)
+                # ax.set_ylim(0.5e18,1e18)
+            #Output to a csv file
+            star.getInterpolatedData().to_csv('SchedulerOutput.csv', index=True)
+            
     def getStarsArray(self):
         return self.__StarsArray
     

@@ -2,7 +2,7 @@
 """
 Created on Thu Mar  9 15:03:01 2023
 
-@author: gigic
+@author: George Pantelimon
 """
 
 import pandas as pd
@@ -13,7 +13,7 @@ import configparser
 import numpy as np
 
 class DayNightFilter:
-    def filter_night_entries(df, start_date, end_date, latitude, longitude):
+    def filter_night_entries(df: pd.DataFrame, start_date: datetime, end_date: datetime, latitude: str, longitude: str, obsLocationElevation: float):
         """
             This functions is calculating the elevation of the star at the moment of each observation in the input dataframe.
             Then, it removes all observations below a threshold.
@@ -37,7 +37,9 @@ class DayNightFilter:
             longitude : str
                 Longitude of the observation location
                 
-
+            obsLocationElevation : float
+                Elevation of the observation location
+                
             Returns
             -------
             DataFrame
@@ -50,6 +52,7 @@ class DayNightFilter:
         observer = ephem.Observer()
         observer.lat = latitude
         observer.lon = longitude
+        observer.elevation = obsLocationElevation
         
         ## Create a new column containing a boolean that shows whether it is day or night. Assign False initially.
         df['night_time'] = False

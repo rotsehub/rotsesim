@@ -2,7 +2,7 @@
 """
 Created on Thu Mar  9 18:51:09 2023
 
-@author: gigic
+@author: George Pantelimon
 """
 
 import pandas as pd
@@ -11,7 +11,7 @@ import datetime
 import numpy as np
 
 class ElevationFilter:
-    def Filter_By_Elevation(df: pd.DataFrame, latitude: str, longitude: str, star_ra: float, star_dec:float, start_date: datetime, end_date: datetime, elevationThreshold: float):
+    def Filter_By_Elevation(df: pd.DataFrame, latitude: str, longitude: str, star_ra: float, star_dec:float, start_date: datetime, end_date: datetime, elevationThreshold: float, obsLocationElevation: float):
         """
             This functions is calculating the elevation of the star at the moment of each observation in the input dataframe.
             Then, it removes all observations below a threshold.
@@ -43,6 +43,9 @@ class ElevationFilter:
                 
             elevationThreshold : float
                 All simulated data where elevation is below the threshold will be filtered out.
+                
+            obsLocationElevation : float
+                Elevation of the observation location
 
             Returns
             -------
@@ -56,7 +59,7 @@ class ElevationFilter:
         observer = ephem.Observer()
         observer.lat = latitude
         observer.lon = longitude
-
+        observer.elevation = obsLocationElevation
         ## Create the star object and assign RA and DEC coordinates to the object
         star = ephem.FixedBody()
         star._ra = ephem.degrees(str(star_ra))
@@ -77,5 +80,6 @@ class ElevationFilter:
             ## Adding the elevation value to the elevation column for the current row
             df.at[i, 'elevation'] = np.degrees(star.alt)
         #Remove all observations below the threshold    
+        #df.to_csv('outputAllElevations.csv', index=True) # was used only for testing
         df = df[df['elevation'] > elevationThreshold]    
         return df

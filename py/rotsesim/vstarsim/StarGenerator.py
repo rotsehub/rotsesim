@@ -2,7 +2,7 @@
 """
 Created on Fri Feb 17 21:46:59 2023
 
-@author: gigic
+@author: George Pantelimon
 """
 import numpy as np
 import random
