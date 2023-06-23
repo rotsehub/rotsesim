@@ -5,9 +5,6 @@ Created on Fri Mar 10 13:25:24 2023
 @author: Zachary McIlroy
 """
 
-# import sys
-# sys.path.append("..")
-
 from datetime import datetime, timedelta
 import pandas as pd
 import Star
@@ -18,7 +15,7 @@ class Precipitation:
     # This method takes the API dataset as an input and compares the precip value at each star observation time to the precip threshold value from the config
     # file
     def precipTrimmer(star : Star, startTime: datetime, precipThreshold: float, data: pd.DataFrame):
-        starData = star.getData()
+        starData = star.getInterpolatedData()
         
         # This for loop iterates through every row in starData that is left after previous filters have been applied
         for index, row in starData.iterrows():
