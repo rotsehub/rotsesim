@@ -5,9 +5,6 @@ Created on Sun Mar 26 16:42:51 2023
 @author: Zachary McIlroy
 """
 
-# import sys
-# sys.path.append("..")
-
 from datetime import datetime, timedelta
 import pandas as pd
 import Star
@@ -19,9 +16,9 @@ class Transparency:
     
     # This method does the transparency adjustment for the first star. This is done in order to increase accuracy and efficiency as new clouds should not
     # be generated for every star if they are within the same sky
-    def firstTransparencyAdjustment(star : Star, startTime: datetime, data: pd.DataFrame, field_center_ra : float, field_center_dec : float, fov : float):
+    def firstTransparencyAdjustment(star : Star, startTime: datetime, data: pd.DataFrame, field_center_ra : float, field_center_dec : float, fov : float, maxCloudCoverage : float, firstCloudSizePercentage : float):
 
-        starData = star.getData()
+        starData = star.getInterpolatedData()
         
         # This list will be the parameter that is passed to the other adjustment method and will hold the time and what to do for any star in the 
         # current FOV at that time
@@ -48,9 +45,9 @@ class Transparency:
             # Boolean to check for partial coverage
             partialCoverage = False
             
-            # This if statement takes weather codes that are known to be mtched with high cloud coverage or a cloud coverage over 80% and drops the
+            # This if statement takes weather codes that are known to be matched with high cloud coverage or a cloud coverage over 80% and drops the
             # star's row at this time and adds the 'drop' value for adjustment to the adjustment list
-            if (weatherCode >= 52 and weatherCode != 71) or weatherCode in [49,47,45,43,39,37,35,34,33,29,28,27,26,25,17,16,12,9,8,4,3] or float(data['hourly']['cloudcover'][hourIndex]) > 80:
+            if (weatherCode >= 52 and weatherCode != 71) or weatherCode in [49,47,45,43,39,37,35,34,33,29,28,27,26,25,17,16,12,9,8,4,3] or float(data['hourly']['cloudcover'][hourIndex]) > maxCloudCoverage:
                 starData.drop(index, axis = 0, inplace = True)
                 
                 # A new dictionary is made and then converted to a dataframe so that the concat() function can be used later
@@ -66,7 +63,7 @@ class Transparency:
                 
             # If none of the above conditions are true, then clouds are at this point generated
             else:
-                clouds = CloudGenerator.CloudGenerator.generateClouds(float(data['hourly']['cloudcover'][hourIndex]))
+                clouds = CloudGenerator.CloudGenerator.generateClouds(float(data['hourly']['cloudcover'][hourIndex]), firstCloudSizePercentage)
                 
                 # This takes the center of the fov and finds the four x and y values that make up its rectangular shape
                 fovPoints = [field_center_ra - fov/2, field_center_dec - fov/2, field_center_ra + fov/2, field_center_dec + fov/2]
@@ -112,12 +109,6 @@ class Transparency:
                     # likely that 70% of the star's light will not get to the ROTSE telescope even if it is not covered by any cloud
                     if not starCovered:
                         row['luminosity'] *= 1 - (float(data['hourly']['cloudcover'][hourIndex]))/100
-                        
-                        # Flux will also be adjusted for this value, the proper column name is just needed
-                        #row['flux'] *= (float(data['hourly']['cloudcover'][hourIndex]))/100
-                    
-                    # This is the code that would reference the separate method that was created to reduce repeated code. However, it is untested
-                    #starData = Transparency.starAdjustment(star, data, adjustmentList, hourIndex, index, row)
                     
                     # The adjustment list is updated with the cloud array so that any additional stars in the FIV can then be evaluated against the same
                     # cloud set
@@ -135,7 +126,7 @@ class Transparency:
     
     # This method is then used for any additional star after the first and takes the adjustment list as an input
     def transparencyAdjuster(star : Star, startTime : datetime, data : pd.DataFrame, adjustmentList : pd.DataFrame, field_center_ra : float, field_center_dec : float, fov : float):
-        starData = star.getData()
+        starData = star.getInterpolatedData()
         
         # This for loop iterates through every row in starData that is left after previous filters have been applied
         for index, row in starData.iterrows():
@@ -181,21 +172,3 @@ class Transparency:
                 
         return starData
     
-    
-    # Attempt to move redundant code to different method in order that there would not be code duplication. May revisit at some point
-    # def starAdjustment(star : Star, data : pd.DataFrame, adjustmentList : pd.DataFrame, hourIndex : int, index : int, row : pd.Series):
-    #     starData = star.getData()
-    #     starRA = star.getRA()
-    #     starDec = star.getDec()
-    #     starCovered = False
-    #     for cloud in adjustmentList['adjustment'][hourIndex]:
-    #         cloudPoints = cloud.getPoints()
-    #         if starRA >= cloudPoints[0] and starRA <= cloudPoints[2] and starDec >= cloudPoints[1] and starDec <= cloudPoints[3]:
-    #             starData.drop(index, axis = 0, inplace = True)
-    #             starCovered = True
-    #             break
-    #     if not starCovered:
-    #         row['luminosity'] *= (float(data['hourly']['cloudcover'][hourIndex]))/100
-    #         #row['flux'] *= (float(data['hourly']['cloudcover'][hourIndex]))/100
-        
-    #     return starData
